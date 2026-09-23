@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team Builder — Archetypal Futbol</title>
+  <meta name="description" content="Drag the eight archetypes onto a formation and see which positions they're aligned to." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23d4af37' d='M12 2 L14.9 9.1 L22.5 9.8 L16.8 14.9 L18.5 22.3 L12 18.3 L5.5 22.3 L7.2 14.9 L1.5 9.8 L9.1 9.1 Z'/%3E%3C/svg%3E" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="site-title" href="index.html">Archetypal <span>Futbol</span></a>
+      <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">&#9776;</button>
+      <nav class="site-nav">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="archetypes.html">Archetypes</a></li>
+          <li><a href="about.html">About</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="builder-intro">
+      <div class="container">
+        <p class="hero-eyebrow">Free tool</p>
+        <h1>Team Builder</h1>
+        <p>
+          Drag any of the eight archetypes onto the pitch to see how they'd sit across
+          different formations. A colored glow means that spot is one of that archetype's
+          aligned positions.
+        </p>
+      </div>
+    </div>
+
+    <section class="builder-section">
+      <div class="container">
+        <div class="builder-layout fade-in-up">
+          <aside class="builder-tray" aria-label="Archetypes">
+            <div class="tray-item" data-slug="immovable">
+              <img src="icons/icon-immovable.png" alt="" />
+              <span>Immovable</span>
+            </div>
+            <div class="tray-item" data-slug="inferno">
+              <img src="icons/icon-inferno.png" alt="" />
+              <span>Inferno</span>
+            </div>
+            <div class="tray-item" data-slug="refiner">
+              <img src="icons/icon-refiner.png" alt="" />
+              <span>Refiner</span>
+            </div>
+            <div class="tray-item" data-slug="lightning">
+              <img src="icons/icon-lightning.png" alt="" />
+              <span>Lightning</span>
+            </div>
+            <div class="tray-item" data-slug="director">
+              <img src="icons/icon-director.png" alt="" />
+              <span>Director</span>
+            </div>
+            <div class="tray-item" data-slug="visionary">
+              <img src="icons/icon-visionary.png" alt="" />
+              <span>Visionary</span>
+            </div>
+            <div class="tray-item" data-slug="flow">
+              <img src="icons/icon-flow.png" alt="" />
+              <span>Flow</span>
+            </div>
+            <div class="tray-item" data-slug="avatar">
+              <img src="icons/icon-avatar.png" alt="" />
+              <span>Avatar</span>
+            </div>
+          </aside>
+
+          <div class="pitch-panel">
+            <div class="formation-picker" id="formationPicker"></div>
+
+            <div class="pitch-container">
+              <svg class="pitch-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                <rect x="3" y="3" width="94" height="94" fill="none" stroke="rgba(234,231,223,0.22)" stroke-width="0.6" />
+                <line x1="3" y1="50" x2="97" y2="50" stroke="rgba(234,231,223,0.22)" stroke-width="0.6" />
+                <circle cx="50" cy="50" r="9" fill="none" stroke="rgba(234,231,223,0.22)" stroke-width="0.6" />
+                <circle cx="50" cy="50" r="0.6" fill="rgba(234,231,223,0.22)" />
+                <rect x="28" y="3" width="44" height="18" fill="none" stroke="rgba(234,231,223,0.22)" stroke-width="0.6" />
+                <rect x="40" y="3" width="20" height="7" fill="none" stroke="rgba(234,231,223,0.22)" stroke-width="0.6" />
+                <circle cx="50" cy="16" r="0.6" fill="rgba(234,231,223,0.22)" />
+                <path d="M 41 21 A 9 9 0 0 0 59 21" fill="none" stroke="rgba(234,231,223,0.22)" stroke-width="0.6" />
+                <rect x="28" y="79" width="44" height="18" fill="none" stroke="rgba(234,231,223,0.22)" stroke-width="0.6" />
+                <rect x="40" y="90" width="20" height="7" fill="none" stroke="rgba(234,231,223,0.22)" stroke-width="0.6" />
+                <circle cx="50" cy="84" r="0.6" fill="rgba(234,231,223,0.22)" />
+                <path d="M 41 79 A 9 9 0 0 1 59 79" fill="none" stroke="rgba(234,231,223,0.22)" stroke-width="0.6" />
+                <path d="M 3 6 A 3 3 0 0 0 6 3" fill="none" stroke="rgba(234,231,223,0.22)" stroke-width="0.5" />
+                <path d="M 94 3 A 3 3 0 0 0 97 6" fill="none" stroke="rgba(234,231,223,0.22)" stroke-width="0.5" />
+                <path d="M 3 94 A 3 3 0 0 1 6 97" fill="none" stroke="rgba(234,231,223,0.22)" stroke-width="0.5" />
+                <path d="M 94 97 A 3 3 0 0 1 97 94" fill="none" stroke="rgba(234,231,223,0.22)" stroke-width="0.5" />
+              </svg>
+              <div class="slots-layer" id="slotsLayer"></div>
+            </div>
+
+            <div class="builder-summary" id="builderSummary">
+              <p class="builder-summary-count" id="summaryCount">0 of 11 positions aligned</p>
+              <p class="builder-summary-status" id="summaryStatus">11 positions still empty</p>
+            </div>
+
+            <div class="builder-actions">
+              <button type="button" class="button" id="clearAllBtn">Clear All</button>
+            </div>
+            <p class="builder-legend">A colored glow marks one of that archetype's aligned positions. No glow just means it's a neutral spot for them.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-signup">
+        <p class="footer-signup-label">Get new essays by email</p>
+        <form class="signup-form" onsubmit="return false">
+          <input type="email" placeholder="you@email.com" disabled />
+          <button type="submit" disabled>Notify Me</button>
+        </form>
+        <span class="signup-note">(coming soon)</span>
+      </div>
+      <div class="footer-meta">
+        <p>&copy; 2026 Archetypal Futbol.</p>
+        <ul class="footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="archetypes.html">Archetypes</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="builder.html">Team Builder</a></li>
+        </ul>
+        <a class="footer-social" href="#" title="YouTube — coming soon" aria-label="YouTube (coming soon)">
+          <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4" fill="currentColor"/><path d="M10 9l6 3-6 3V9z" fill="#0b0f0c"/></svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/builder.js"></script>
+</body>
+</html>

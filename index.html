@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Archetypal Futbol</title>
+  <meta name="description" content="Football, read through the lens of archetype — Immovable, Inferno, Refiner, Lightning, Director, Visionary, Flow, and Avatar." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23d4af37' d='M12 2 L14.9 9.1 L22.5 9.8 L16.8 14.9 L18.5 22.3 L12 18.3 L5.5 22.3 L7.2 14.9 L1.5 9.8 L9.1 9.1 Z'/%3E%3C/svg%3E" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@0,700;1,700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <div class="discovery-hud">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v4l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <span id="foundCount">0</span>&nbsp;/&nbsp;8 discovered
+  </div>
+
+  <div class="hint-bar" id="hintBar">Look around&hellip; find the hidden marks to unlock each archetype</div>
+
+  <div class="explore-scene">
+    <div class="scene-stars"></div>
+    <div class="scene-ground"></div>
+    <div class="explore-title">
+      <h1>Eight Ways<br>To Play</h1>
+      <div class="explore-subtitle">Find the hidden marks to unlock each archetype</div>
+    </div>
+
+    <a class="hidden-object anim-flicker" id="obj-lightning" data-slug="lightning" href="articles/lightning.html" style="color:#22C55E">
+      <img src="icons/icon-lightning.png" alt="" />
+      <span class="obj-label" style="color:#22C55E">Lightning</span>
+    </a>
+
+    <a class="hidden-object anim-settle" id="obj-immovable" data-slug="immovable" href="articles/immovable.html" style="color:#DC2626">
+      <img src="icons/icon-immovable.png" alt="" />
+      <span class="obj-label" style="color:#DC2626">Immovable</span>
+    </a>
+
+    <a class="hidden-object anim-flicker" id="obj-inferno" data-slug="inferno" href="articles/inferno.html" style="color:#FACC15">
+      <img src="icons/icon-inferno.png" alt="" />
+      <span class="obj-label" style="color:#FACC15">Inferno</span>
+    </a>
+
+    <a class="hidden-object anim-shimmer" id="obj-refiner" data-slug="refiner" href="articles/refiner.html" style="color:#F97316">
+      <img src="icons/icon-refiner.png" alt="" />
+      <span class="obj-label" style="color:#F97316">Refiner</span>
+    </a>
+
+    <a class="hidden-object anim-pulse" id="obj-director" data-slug="director" href="articles/director.html" style="color:#38BDF8">
+      <img src="icons/icon-director.png" alt="" />
+      <span class="obj-label" style="color:#38BDF8">Director</span>
+    </a>
+
+    <a class="hidden-object anim-blink" id="obj-visionary" data-slug="visionary" href="articles/visionary.html" style="color:#A855F7">
+      <img src="icons/icon-visionary.png" alt="" />
+      <span class="obj-label" style="color:#A855F7">Visionary</span>
+    </a>
+
+    <a class="hidden-object anim-sway" id="obj-flow" data-slug="flow" href="articles/flow.html" style="color:#7C3AED">
+      <img src="icons/icon-flow.png" alt="" />
+      <span class="obj-label" style="color:#7C3AED">Flow</span>
+    </a>
+
+    <a class="hidden-object anim-pulse-grand" id="obj-avatar" data-slug="avatar" href="articles/avatar.html" style="color:#D4AF37">
+      <img src="icons/icon-avatar.png" alt="" />
+      <span class="obj-label" style="color:#D4AF37">Avatar</span>
+    </a>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-signup">
+        <p class="footer-signup-label">Get new essays by email</p>
+        <form class="signup-form" onsubmit="return false">
+          <input type="email" placeholder="you@email.com" disabled />
+          <button type="submit" disabled>Notify Me</button>
+        </form>
+        <span class="signup-note">(coming soon)</span>
+      </div>
+      <div class="footer-meta">
+        <p>&copy; 2026 Archetypal Futbol.</p>
+        <ul class="footer-links">
+          <li><a href="archetypes.html">Archetypes</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="builder.html">Team Builder</a></li>
+        </ul>
+        <a class="footer-social" href="#" title="YouTube — coming soon" aria-label="YouTube (coming soon)">
+          <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4" fill="currentColor"/><path d="M10 9l6 3-6 3V9z" fill="#0b0f0c"/></svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/discovery.js"></script>
+  <script>AFDiscovery.initExploreScene();</script>
+</body>
+</html>
