@@ -13,6 +13,28 @@
     avatar: "Avatar",
   };
 
+  var COLORS = {
+    lightning: "#22C55E",
+    immovable: "#DC2626",
+    inferno: "#FACC15",
+    refiner: "#F97316",
+    director: "#38BDF8",
+    visionary: "#A855F7",
+    flow: "#7C3AED",
+    avatar: "#D4AF37",
+  };
+
+  var STATS = {
+    lightning: { animal: "Stag", group: "Wild Card", core: "Unity" },
+    immovable: { animal: "Elephant", group: "Instinctive", core: "Rootedness" },
+    inferno: { animal: "Ram", group: "Instinctive", core: "Passion" },
+    refiner: { animal: "Crocodile", group: "Instinctive", core: "Refinement" },
+    director: { animal: "Dolphin", group: "Cognitive", core: "Imagination" },
+    visionary: { animal: "Owl", group: "Cognitive", core: "Vision" },
+    flow: { animal: "Eagle", group: "Cognitive", core: "Flow" },
+    avatar: { animal: "All Seven", group: "Emergent", core: "Mastery" },
+  };
+
   function getDiscovered() {
     try {
       var raw = window.localStorage.getItem(STORAGE_KEY);
@@ -33,6 +55,123 @@
     } catch (e) {
       /* localStorage unavailable; discovery just won't persist */
     }
+  }
+
+  var revealTimers = [];
+  var revealHref = null;
+  var revealSkipBound = false;
+
+  function clearRevealTimers() {
+    revealTimers.forEach(function (id) {
+      window.clearTimeout(id);
+    });
+    revealTimers = [];
+  }
+
+  function scheduleReveal(fn, delay) {
+    var id = window.setTimeout(fn, delay);
+    revealTimers.push(id);
+    return id;
+  }
+
+  function skipReveal() {
+    if (!revealHref) return;
+    var href = revealHref;
+    revealHref = null;
+    clearRevealTimers();
+    window.location.href = href;
+  }
+
+  function bindRevealSkip(overlay) {
+    if (revealSkipBound) return;
+    revealSkipBound = true;
+    overlay.addEventListener("click", function () {
+      skipReveal();
+    });
+  }
+
+  function prefersReducedMotion() {
+    try {
+      return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function playCardReveal(slug, href) {
+    var overlay = document.getElementById("revealOverlay");
+    var inner = document.getElementById("revealCardInner");
+    if (!overlay || !inner || !STATS[slug]) return false;
+
+    var stats = STATS[slug];
+    var color = COLORS[slug] || "#d4af37";
+    var reduced = prefersReducedMotion();
+
+    var iconEl = document.getElementById("revealIcon");
+    var nameEl = document.getElementById("revealName");
+    var animalEl = document.getElementById("revealAnimal");
+    var groupEl = document.getElementById("revealGroup");
+    var coreEl = document.getElementById("revealCore");
+
+    if (iconEl) iconEl.src = "icons/icon-" + slug + ".png";
+    if (iconEl) iconEl.alt = NAMES[slug] || "";
+    if (nameEl) nameEl.textContent = NAMES[slug] || "";
+    if (animalEl) animalEl.textContent = stats.animal;
+    if (groupEl) groupEl.textContent = stats.group;
+    if (coreEl) coreEl.textContent = stats.core;
+
+    overlay.style.setProperty("--reveal-color", color);
+
+    var statRows = overlay.querySelectorAll(".reveal-stat");
+    statRows.forEach(function (row) {
+      row.classList.remove("stat-in");
+    });
+    inner.classList.remove("flipped");
+    overlay.classList.remove("show");
+    overlay.classList.toggle("no-motion", reduced);
+    overlay.hidden = false;
+
+    // force a reflow so the entrance transition reliably (re)plays even if
+    // triggered again in the same session
+    void overlay.offsetWidth;
+
+    bindRevealSkip(overlay);
+    clearRevealTimers();
+    revealHref = href;
+
+    if (reduced) {
+      // respect prefers-reduced-motion: skip the rise/flip/stagger motion,
+      // snap straight to the fully revealed state, hold briefly, then go
+      requestAnimationFrame(function () {
+        overlay.classList.add("show");
+        inner.classList.add("flipped");
+        statRows.forEach(function (row) {
+          row.classList.add("stat-in");
+        });
+      });
+      scheduleReveal(skipReveal, 1100);
+      return true;
+    }
+
+    requestAnimationFrame(function () {
+      overlay.classList.add("show");
+    });
+
+    scheduleReveal(function () {
+      inner.classList.add("flipped");
+    }, 350);
+
+    scheduleReveal(function () {
+      statRows.forEach(function (row, i) {
+        scheduleReveal(function () {
+          row.classList.add("stat-in");
+        }, i * 130);
+      });
+    }, 950);
+
+    scheduleReveal(skipReveal, 2300);
+
+    return true;
   }
 
   function initExploreScene() {
@@ -89,8 +228,14 @@
     }
 
     document.querySelectorAll(".hidden-object[data-slug]").forEach(function (obj) {
-      obj.addEventListener("click", function () {
-        markDiscovered(obj.getAttribute("data-slug"));
+      obj.addEventListener("click", function (e) {
+        var slug = obj.getAttribute("data-slug");
+        var isNew = getDiscovered().indexOf(slug) === -1;
+        markDiscovered(slug);
+        if (!isNew) return; // already seen: normal instant navigation
+        if (playCardReveal(slug, obj.getAttribute("href"))) {
+          e.preventDefault();
+        }
       });
     });
 

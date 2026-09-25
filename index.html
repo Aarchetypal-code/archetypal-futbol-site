@@ -10,20 +10,34 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-
-  <div class="discovery-hud">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v4l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-    <span id="foundCount">0</span>&nbsp;/&nbsp;8 discovered
-  </div>
-
-  <div class="hint-bar" id="hintBar">Look around&hellip; find the hidden marks to unlock each archetype</div>
+  <header class="site-header">
+    <div class="container">
+      <a class="site-title" href="index.html">Archetypal <span>Futbol</span></a>
+      <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">&#9776;</button>
+      <nav class="site-nav">
+        <ul>
+          <li><a href="index.html" aria-current="page">Home</a></li>
+          <li><a href="archetypes.html">Archetypes</a></li>
+          <li><a href="builder.html">Team Builder</a></li>
+          <li><a href="about.html">About</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
 
   <div class="explore-scene">
+    <div class="discovery-hud">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v4l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span id="foundCount">0</span>&nbsp;/&nbsp;8 discovered
+    </div>
+
+    <div class="hint-bar" id="hintBar">Look around&hellip; find the hidden marks to unlock each archetype</div>
+
     <div class="scene-stars"></div>
     <div class="scene-ground"></div>
     <div class="explore-title">
-      <h1>Eight Ways<br>To Play</h1>
-      <div class="explore-subtitle">Find the hidden marks to unlock each archetype</div>
+      <h1>Eight Ways<br>To Play Futbol</h1>
+      <div class="explore-subtitle">Hover and click the icons to unlock each archetype</div>
     </div>
 
     <a class="hidden-object anim-flicker" id="obj-lightning" data-slug="lightning" href="articles/lightning.html" style="color:#22C55E">
@@ -67,6 +81,38 @@
     </a>
   </div>
 
+  <div class="reveal-overlay" id="revealOverlay" hidden aria-hidden="true">
+    <div class="reveal-backdrop"></div>
+    <div class="reveal-card">
+      <div class="reveal-card-inner" id="revealCardInner">
+        <div class="reveal-card-face reveal-card-front">
+          <span class="reveal-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2 L14.9 9.1 L22.5 9.8 L16.8 14.9 L18.5 22.3 L12 18.3 L5.5 22.3 L7.2 14.9 L1.5 9.8 L9.1 9.1 Z"/></svg>
+          </span>
+          <span class="reveal-brand">Archetypal Futbol</span>
+        </div>
+        <div class="reveal-card-face reveal-card-back">
+          <span class="reveal-icon"><img id="revealIcon" src="" alt="" /></span>
+          <h2 class="reveal-name" id="revealName"></h2>
+          <div class="reveal-stats">
+            <div class="reveal-stat">
+              <span class="reveal-stat-label">Animal</span>
+              <span class="reveal-stat-value" id="revealAnimal"></span>
+            </div>
+            <div class="reveal-stat">
+              <span class="reveal-stat-label">Group</span>
+              <span class="reveal-stat-value" id="revealGroup"></span>
+            </div>
+            <div class="reveal-stat">
+              <span class="reveal-stat-label">Core</span>
+              <span class="reveal-stat-value" id="revealCore"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer class="site-footer">
     <div class="container footer-grid">
       <div class="footer-signup">
@@ -91,6 +137,7 @@
     </div>
   </footer>
 
+  <script src="js/main.js"></script>
   <script src="js/discovery.js"></script>
   <script>AFDiscovery.initExploreScene();</script>
 </body>

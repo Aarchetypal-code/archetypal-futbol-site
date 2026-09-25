@@ -1,14 +1,5 @@
 (function () {
-  var COLORS = {
-    immovable: "#DC2626",
-    inferno: "#FACC15",
-    refiner: "#F97316",
-    lightning: "#22C55E",
-    director: "#38BDF8",
-    visionary: "#A855F7",
-    flow: "#7C3AED",
-    avatar: "#D4AF37",
-  };
+  var ORDER = ["immovable", "inferno", "refiner", "lightning", "director", "visionary", "flow", "avatar"];
 
   var NAMES = {
     immovable: "Immovable",
@@ -103,8 +94,10 @@
     placements: {}, // slotNumber -> archetype slug
   };
 
-  var slotsLayer, formationPicker, ghostEl, dragArchetype, dragOriginSlot;
+  var slotsLayer, formationPicker;
   var summaryCountEl, summaryStatusEl;
+  var activePicker = null;
+  var activeSlotNumber = null;
 
   function isAligned(slug, slotNumber) {
     var list = ALIGNED[slug];
@@ -123,6 +116,7 @@
       btn.textContent = key;
       btn.addEventListener("click", function () {
         if (key === state.formation) return;
+        closePicker();
         state.formation = key;
         state.placements = {};
         renderFormationPicker();
@@ -130,42 +124,6 @@
       });
       formationPicker.appendChild(btn);
     });
-  }
-
-  function renderSlots() {
-    slotsLayer.innerHTML = "";
-    var slots = FORMATIONS[state.formation];
-    slots.forEach(function (slotData) {
-      var slot = document.createElement("div");
-      slot.className = "slot";
-      slot.dataset.number = String(slotData.n);
-      slot.style.left = slotData.x + "%";
-      slot.style.top = slotData.y + "%";
-
-      var badge = document.createElement("span");
-      badge.className = "slot-number";
-      badge.textContent = "#" + slotData.n;
-      slot.appendChild(badge);
-
-      slotsLayer.appendChild(slot);
-
-      var placed = state.placements[slotData.n];
-      if (placed) {
-        applySlotContent(slot, placed);
-      }
-
-      slot.addEventListener("pointerdown", function (e) {
-        var current = state.placements[slotData.n];
-        if (!current) return;
-        e.preventDefault();
-        delete state.placements[slotData.n];
-        clearSlotContent(slot);
-        updateSummary();
-        startDrag(current, e, slot);
-      });
-    });
-
-    updateSummary();
   }
 
   function updateSummary() {
@@ -189,111 +147,249 @@
   }
 
   function clearSlotContent(slot) {
-    slot.classList.remove("filled", "aligned");
+    slot.classList.remove("filled", "aligned", "off-position");
     slot.style.removeProperty("--slot-color");
     var img = slot.querySelector("img");
     if (img) img.remove();
+    var label = slot.querySelector(".slot-fill-label");
+    if (label) label.remove();
   }
 
-  function applySlotContent(slot, slug) {
+  function applySlotContent(slot, slug, slotX) {
     clearSlotContent(slot);
+    // force a reflow so the glow animation replays even when swapping
+    // one archetype for another in an already-filled slot
+    void slot.offsetWidth;
+
     slot.classList.add("filled");
+
     var img = document.createElement("img");
     img.src = "icons/icon-" + slug + ".png";
     img.alt = NAMES[slug];
     slot.insertBefore(img, slot.firstChild);
 
+    var label = document.createElement("span");
+    label.className = "slot-fill-label " + (slotX > 55 ? "label-left" : "label-right");
+    label.textContent = NAMES[slug];
+    slot.appendChild(label);
+
     var slotNumber = Number(slot.dataset.number);
-    if (isAligned(slug, slotNumber)) {
-      slot.classList.add("aligned");
-      slot.style.setProperty("--slot-color", COLORS[slug]);
-    }
+    slot.style.setProperty("--slot-color", COLORS[slug]);
+    slot.classList.add(isAligned(slug, slotNumber) ? "aligned" : "off-position");
   }
 
-  function findSlotAtPoint(clientX, clientY) {
-    if (ghostEl) ghostEl.style.display = "none";
-    var el = document.elementFromPoint(clientX, clientY);
-    if (ghostEl) ghostEl.style.display = "";
-    if (!el) return null;
-    return el.closest(".slot");
+  var COLORS = {
+    immovable: "#DC2626",
+    inferno: "#FACC15",
+    refiner: "#F97316",
+    lightning: "#22C55E",
+    director: "#38BDF8",
+    visionary: "#A855F7",
+    flow: "#7C3AED",
+    avatar: "#D4AF37",
+  };
+
+  function renderSlots() {
+    closePicker();
+    slotsLayer.innerHTML = "";
+    var slots = FORMATIONS[state.formation];
+    slots.forEach(function (slotData) {
+      var slot = document.createElement("div");
+      slot.className = "slot";
+      slot.dataset.number = String(slotData.n);
+      slot.style.left = slotData.x + "%";
+      slot.style.top = slotData.y + "%";
+
+      var badge = document.createElement("span");
+      badge.className = "slot-number";
+      badge.textContent = "#" + slotData.n;
+      slot.appendChild(badge);
+
+      slotsLayer.appendChild(slot);
+
+      var placed = state.placements[slotData.n];
+      if (placed) {
+        applySlotContent(slot, placed, slotData.x);
+      }
+
+      slot.addEventListener("click", function (e) {
+        e.stopPropagation();
+        if (activePicker && activeSlotNumber === slotData.n) {
+          closePicker();
+          return;
+        }
+        openPicker(slot, slotData.n);
+      });
+    });
+
+    updateSummary();
   }
 
-  function startDrag(slug, pointerEvent, originSlot) {
-    dragArchetype = slug;
-    dragOriginSlot = originSlot || null;
+  function assignSlot(slotNumber, slug) {
+    var slot = slotsLayer.querySelector('.slot[data-number="' + slotNumber + '"]');
+    if (!slot) return;
+    var slotData = FORMATIONS[state.formation].filter(function (s) { return s.n === slotNumber; })[0];
+    state.placements[slotNumber] = slug;
+    applySlotContent(slot, slug, slotData ? slotData.x : 50);
+    updateSummary();
+  }
 
-    ghostEl = document.createElement("div");
-    ghostEl.className = "drag-ghost";
+  function removeSlot(slotNumber) {
+    var slot = slotsLayer.querySelector('.slot[data-number="' + slotNumber + '"]');
+    delete state.placements[slotNumber];
+    if (slot) clearSlotContent(slot);
+    updateSummary();
+  }
+
+  function closePicker() {
+    if (!activePicker) return;
+    activePicker.remove();
+    activePicker = null;
+    activeSlotNumber = null;
+    document.removeEventListener("click", onDocumentClick);
+    document.removeEventListener("keydown", onDocumentKeydown);
+  }
+
+  function onDocumentClick(e) {
+    if (!activePicker) return;
+    if (activePicker.contains(e.target)) return;
+    closePicker();
+  }
+
+  function onDocumentKeydown(e) {
+    if (e.key === "Escape") closePicker();
+  }
+
+  function buildPickerRow(slug, index, onSelect) {
+    var row = document.createElement("button");
+    row.type = "button";
+    row.className = "slot-picker-row";
+    row.style.animationDelay = (index * 35) + "ms";
+
+    var icon = document.createElement("span");
+    icon.className = "slot-picker-row-icon";
     var img = document.createElement("img");
     img.src = "icons/icon-" + slug + ".png";
     img.alt = "";
-    ghostEl.appendChild(img);
-    document.body.appendChild(ghostEl);
-    positionGhost(pointerEvent.clientX, pointerEvent.clientY);
+    icon.appendChild(img);
 
-    document.addEventListener("pointermove", onDragMove);
-    document.addEventListener("pointerup", onDragEnd);
-    document.addEventListener("pointercancel", onDragEnd);
-  }
+    var name = document.createElement("span");
+    name.className = "slot-picker-row-name";
+    name.textContent = NAMES[slug];
 
-  function positionGhost(clientX, clientY) {
-    if (!ghostEl) return;
-    var halfW = ghostEl.offsetWidth / 2;
-    var halfH = ghostEl.offsetHeight / 2;
-    ghostEl.style.transform = "translate(" + (clientX - halfW) + "px, " + (clientY - halfH) + "px)";
-  }
-
-  var hoveredSlot = null;
-
-  function onDragMove(e) {
-    positionGhost(e.clientX, e.clientY);
-    var slot = findSlotAtPoint(e.clientX, e.clientY);
-    if (hoveredSlot && hoveredSlot !== slot) {
-      hoveredSlot.classList.remove("drag-over");
-    }
-    if (slot) {
-      slot.classList.add("drag-over");
-    }
-    hoveredSlot = slot;
-  }
-
-  function onDragEnd(e) {
-    document.removeEventListener("pointermove", onDragMove);
-    document.removeEventListener("pointerup", onDragEnd);
-    document.removeEventListener("pointercancel", onDragEnd);
-
-    if (hoveredSlot) hoveredSlot.classList.remove("drag-over");
-
-    var dropSlot = findSlotAtPoint(e.clientX, e.clientY);
-    if (dropSlot) {
-      var slotNumber = Number(dropSlot.dataset.number);
-      state.placements[slotNumber] = dragArchetype;
-      applySlotContent(dropSlot, dragArchetype);
-    }
-    updateSummary();
-
-    if (ghostEl) {
-      ghostEl.remove();
-      ghostEl = null;
-    }
-    dragArchetype = null;
-    dragOriginSlot = null;
-    hoveredSlot = null;
-  }
-
-  function initTray() {
-    document.querySelectorAll(".tray-item[data-slug]").forEach(function (item) {
-      item.addEventListener("pointerdown", function (e) {
-        e.preventDefault();
-        startDrag(item.getAttribute("data-slug"), e, null);
-      });
+    row.appendChild(icon);
+    row.appendChild(name);
+    row.addEventListener("click", function (e) {
+      e.stopPropagation();
+      onSelect();
     });
+    return row;
+  }
+
+  function openPicker(slotEl, slotNumber) {
+    closePicker();
+
+    var picker = document.createElement("div");
+    picker.className = "slot-picker";
+
+    var header = document.createElement("div");
+    header.className = "slot-picker-header";
+    var title = document.createElement("span");
+    title.textContent = "Position #" + slotNumber;
+    var closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.className = "slot-picker-close";
+    closeBtn.setAttribute("aria-label", "Close");
+    closeBtn.innerHTML = "&times;";
+    closeBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      closePicker();
+    });
+    header.appendChild(title);
+    header.appendChild(closeBtn);
+    picker.appendChild(header);
+
+    var list = document.createElement("div");
+    list.className = "slot-picker-list";
+
+    ORDER.forEach(function (slug, i) {
+      var row = buildPickerRow(slug, i, function () {
+        assignSlot(slotNumber, slug);
+        closePicker();
+      });
+      list.appendChild(row);
+    });
+
+    if (state.placements[slotNumber]) {
+      var divider = document.createElement("div");
+      divider.className = "slot-picker-divider";
+      list.appendChild(divider);
+
+      var removeRow = document.createElement("button");
+      removeRow.type = "button";
+      removeRow.className = "slot-picker-row slot-picker-remove";
+      removeRow.style.animationDelay = (ORDER.length * 35) + "ms";
+      var removeIcon = document.createElement("span");
+      removeIcon.className = "slot-picker-row-icon slot-picker-row-icon-remove";
+      removeIcon.innerHTML = "&times;";
+      var removeName = document.createElement("span");
+      removeName.className = "slot-picker-row-name";
+      removeName.textContent = "Remove";
+      removeRow.appendChild(removeIcon);
+      removeRow.appendChild(removeName);
+      removeRow.addEventListener("click", function (e) {
+        e.stopPropagation();
+        removeSlot(slotNumber);
+        closePicker();
+      });
+      list.appendChild(removeRow);
+    }
+
+    picker.appendChild(list);
+
+    // measure off-screen first so we can position it accurately
+    picker.style.visibility = "hidden";
+    picker.style.top = "0px";
+    picker.style.left = "0px";
+    document.body.appendChild(picker);
+
+    var slotRect = slotEl.getBoundingClientRect();
+    var pickerWidth = Math.min(240, window.innerWidth - 24);
+    picker.style.width = pickerWidth + "px";
+
+    var pickerHeight = picker.offsetHeight;
+    var spaceBelow = window.innerHeight - slotRect.bottom;
+    var spaceAbove = slotRect.top;
+    var gap = 10;
+
+    var top;
+    if (spaceBelow >= pickerHeight + gap || spaceBelow >= spaceAbove) {
+      top = slotRect.bottom + gap;
+      top = Math.min(top, window.innerHeight - pickerHeight - 8);
+    } else {
+      top = slotRect.top - pickerHeight - gap;
+    }
+    top = Math.max(8, top);
+
+    var left = slotRect.left + slotRect.width / 2 - pickerWidth / 2;
+    left = Math.max(8, Math.min(left, window.innerWidth - pickerWidth - 8));
+
+    picker.style.top = top + "px";
+    picker.style.left = left + "px";
+    picker.style.visibility = "visible";
+
+    activePicker = picker;
+    activeSlotNumber = slotNumber;
+
+    document.addEventListener("click", onDocumentClick);
+    document.addEventListener("keydown", onDocumentKeydown);
   }
 
   function initClearAll() {
     var btn = document.getElementById("clearAllBtn");
     if (!btn) return;
     btn.addEventListener("click", function () {
+      closePicker();
       state.placements = {};
       renderSlots();
     });
@@ -308,7 +404,6 @@
 
     renderFormationPicker();
     renderSlots();
-    initTray();
     initClearAll();
   });
 })();
