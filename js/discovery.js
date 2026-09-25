@@ -149,7 +149,7 @@
           row.classList.add("stat-in");
         });
       });
-      scheduleReveal(skipReveal, 1100);
+      scheduleReveal(skipReveal, 2850);
       return true;
     }
 
@@ -169,7 +169,7 @@
       });
     }, 950);
 
-    scheduleReveal(skipReveal, 2300);
+    scheduleReveal(skipReveal, 4050);
 
     return true;
   }
